@@ -65,15 +65,15 @@ You can create it via **AWS CLI** or Terraform.
 
 `aws dynamodb create-table \`
 
-    `--table-name terraform-locks \`
+`--table-name terraform-locks \`
 
-    `--attribute-definitions AttributeName=LockID,AttributeType=S \`
+`--attribute-definitions AttributeName=LockID,AttributeType=S \`
 
-    `--key-schema AttributeName=LockID,KeyType=HASH \`
+`--key-schema AttributeName=LockID,KeyType=HASH \`
 
-    `--provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \`
+`--provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \`
 
-    `--region us-east-1`
+`--region us-east-1`
 
 **Explanation:**
 
@@ -84,7 +84,7 @@ You can create it via **AWS CLI** or Terraform.
 
 ### **Option B: Using Terraform**
 
-Create a file called `dynamodb.tf`:
+**Create a file called `dynamodb.tf`:**
 
 `resource "aws_dynamodb_table" "terraform_locks" {`
 
@@ -122,7 +122,7 @@ This will create the DynamoDB table automatically.
 
 ## **Step 2: Configure Backend with S3 \+ DynamoDB**
 
-Create or update `backend.tf`:
+**Create or update `backend.tf`:**
 
 `terraform {`
 
