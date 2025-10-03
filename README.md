@@ -57,6 +57,101 @@ Terraform uses an **S3 bucket \+ DynamoDB** for state management.
 
 * Encrypted (SSE) in S3 for security.
 
+## **Create DynamoDB Table for Locking**
+
+You can create it via **AWS CLI** or Terraform.
+
+### **Option A: Using AWS CLI**
+
+`aws dynamodb create-table \`
+
+    `--table-name terraform-locks \`
+
+    `--attribute-definitions AttributeName=LockID,AttributeType=S \`
+
+    `--key-schema AttributeName=LockID,KeyType=HASH \`
+
+    `--provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \`
+
+    `--region us-east-1`
+
+**Explanation:**
+
+* `LockID` → Primary key for DynamoDB table.  
+* Used by Terraform to acquire locks during `apply` to prevent concurrent changes.
+
+---
+
+### **Option B: Using Terraform**
+
+Create a file called `dynamodb.tf`:
+
+`resource "aws_dynamodb_table" "terraform_locks" {`
+
+  `name         = "terraform-locks"`
+
+  `billing_mode = "PAY_PER_REQUEST"`
+
+  `hash_key     = "LockID"`
+
+  `attribute {`
+
+    `name = "LockID"`
+
+    `type = "S"`
+
+  `}`
+
+  `tags = {`
+
+    `Name = "Terraform Locks"`
+
+  `}`
+
+`}`
+
+Then run:
+
+`terraform init`
+
+`terraform apply`
+
+This will create the DynamoDB table automatically.
+
+---
+
+## **Step 2: Configure Backend with S3 \+ DynamoDB**
+
+Create or update `backend.tf`:
+
+`terraform {`
+
+  `backend "s3" {`
+
+    `bucket         = "<YOUR_S3_BUCKET_NAME>"`
+
+    `key            = "terraform.tfstate"   # path inside the bucket`
+
+    `region         = "us-east-1"`
+
+    `dynamodb_table = "terraform-locks"    # DynamoDB table for state locking`
+
+    `encrypt        = true                  # encrypt state at rest`
+
+  `}`
+
+`}`
+
+**Replace** `<YOUR_S3_BUCKET_NAME>` with your existing S3 bucket name.
+
+---
+
+✅ **Important Notes**
+
+* Always use **S3 \+ DynamoDB** in production for safe **remote state \+ locking**.
+
+* Use **versioning** on the S3 bucket to avoid accidental state loss.
+
 ---
 
 ## **⚙️ Prerequisites**
